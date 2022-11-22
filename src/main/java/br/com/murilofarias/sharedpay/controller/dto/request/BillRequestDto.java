@@ -30,6 +30,9 @@ public class BillRequestDto {
     @NotNull
     private Boolean hasWaiterService;
 
+    @NotNull
+    private Boolean includeOwnerPayment;
+
     @NotEmpty
     @Size(min=2)
     private List<@Valid IndividualSpendingDto> individualSpendings;
@@ -43,7 +46,13 @@ public class BillRequestDto {
                 .map(IndividualSpendingDto::toDomainModel)
                 .collect(Collectors.toList());
 
-        Bill bill =  new Bill(additionals, discounts, hasWaiterService, individualSpendings, owner.toDomainModel());
+        Bill bill =  new Bill(
+                additionals,
+                discounts,
+                hasWaiterService,
+                individualSpendings,
+                includeOwnerPayment,
+                owner.toDomainModel());
 
         return bill;
     }

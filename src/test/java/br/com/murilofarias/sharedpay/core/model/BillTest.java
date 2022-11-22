@@ -43,6 +43,7 @@ class BillTest {
                 spendingBundleTest.getDiscounts(),
                 true,
                 spendingBundleTest.getIndividualSpendings(),
+                false,
                 billOwner);
 
         //Assert
@@ -63,6 +64,7 @@ class BillTest {
                 spendingBundleTest.getDiscounts(),
                 true,
                 spendingBundleTest.getIndividualSpendings(),
+                false,
                 billOwner);
 
 
@@ -74,8 +76,8 @@ class BillTest {
 
     @ParameterizedTest
     @MethodSource("provideBillSpendingsForGeneratePaymentsWithoutWaiterService")
-    @DisplayName("Testing generation of payments in a bill without waiter service")
-    void generatePayments_whenThereIsNoWaiterService(
+    @DisplayName("Testing generation of payments in a bill without waiter service and owner payment is not included")
+    void generatePayments_whenThereIsNoWaiterServiceAndOwnerPaymentIsNotIncluded(
             BigDecimal additionals,
             BigDecimal discounts,
             List<IndividualSpending> individualSpendings,
@@ -83,13 +85,14 @@ class BillTest {
 
         //Arrange
         boolean hasWaiterService = false;
-
+        boolean includeOwnerPayment = false;
 
         Bill bill =  new Bill(
                 additionals,
                 discounts,
                 hasWaiterService,
                 individualSpendings,
+                includeOwnerPayment,
                 billOwner);
 
         //Act
@@ -127,21 +130,22 @@ class BillTest {
 
     @ParameterizedTest
     @MethodSource("provideBillSpendingsForGeneratePaymentsWithWaiterService")
-    @DisplayName("Testing generation of payments in a bill with waiter service")
-    void generatePayments_whenThereIsWaiterService(
+    @DisplayName("Testing generation of payments in a bill with waiter service and owner payment is not included")
+    void generatePayments_whenThereIsWaiterServiceAndOwnerPaymentIsNotIncluded(
             BigDecimal additionals,
             BigDecimal discounts,
             List<IndividualSpending> individualSpendings,
             List<BigDecimal> expectedPayments) {
         //Arrange
         boolean hasWaiterService = true;
-
+        boolean includeOwnerPayment = false;
 
         Bill bill =  new Bill(
                 additionals,
                 discounts,
                 hasWaiterService,
                 individualSpendings,
+                includeOwnerPayment,
                 billOwner);
 
         //Act

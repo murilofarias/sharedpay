@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 @NoArgsConstructor
@@ -35,16 +36,21 @@ public class Bill{
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL)
     private List<Payment> payments;
 
+    @Column
+    private Boolean includeOwnerPayment;
+
     @Embedded
     private Person owner;
 
     public Bill(BigDecimal additionals, BigDecimal discounts,
-                Boolean hasWaiterService, List<IndividualSpending> individualSpendings, Person owner){
+                Boolean hasWaiterService, List<IndividualSpending> individualSpendings,
+                Boolean includeOwnerPayment, Person owner){
 
         this.additionals = additionals;
         this.discounts = discounts;
         this.hasWaiterService = hasWaiterService;
         this.individualSpendings = individualSpendings;
+        this.includeOwnerPayment = includeOwnerPayment;
         this.owner = owner;
 
         individualSpendings
@@ -64,10 +70,14 @@ public class Bill{
 
         BigDecimal constantFactor = total.divide(individualSpendingsSum, 6, RoundingMode.HALF_UP);
 
-        this.payments = individualSpendings
-                .stream()
-                .filter(individualSpending -> !individualSpending.getPerson().getCpf().equals(owner.getCpf()))
-                .map(individualSpending -> {
+        Stream<IndividualSpending> individualSpendingsStream  = individualSpendings
+                .stream();
+
+        if(!includeOwnerPayment) {
+            individualSpendingsStream = individualSpendingsStream.filter(individualSpending -> !individualSpending.getPerson().getCpf().equals(owner.getCpf()));
+        }
+
+        this.payments =  individualSpendingsStream.map(individualSpending -> {
                     BigDecimal paymentValue = individualSpending.getValue()
                             .multiply(constantFactor)
                             .setScale(2, RoundingMode.HALF_UP);
@@ -75,6 +85,7 @@ public class Bill{
                     return new Payment(individualSpending.getPerson(), paymentValue, this);
                 })
                 .collect(Collectors.toList());
+
     }
 
     public BigDecimal getIndividualSpendingSum(){
