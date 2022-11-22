@@ -26,6 +26,19 @@ services:
     networks:
     - postgres
 
+  spring_boot:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: spring_boot/api
+    ports:
+      - '8080:8080'
+    depends_on:
+      - "postgres"
+    links:
+      - postgres
+    networks:
+      - postgres
 networks:
   postgres:
     driver: bridge

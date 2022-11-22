@@ -39,7 +39,8 @@ public class BillNotificationService {
         taskScheduler.submit(new Runnable() {
             @Override
             @Transactional
-            public void run() {                try {
+            public void run() {
+                try {
                     PaymentStatus status = paymentService.requestPaymentStatus(paymentId);
                     Payment payment = paymentRepository.findById(parseLong(paymentId)).get();
                     payment.setStatus(status);
