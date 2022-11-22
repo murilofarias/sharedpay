@@ -33,7 +33,7 @@ public class BillController {
     public ResponseEntity<List<PaymentDto>> getBillPayments(@PathVariable(value = "id") Long billId) {
         List<Payment> payments = billService.getBillPayments(billId);
         List<PaymentDto> response = payments.stream().map(PaymentDto::new).collect(Collectors.toList());
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/{id}/request-payments")

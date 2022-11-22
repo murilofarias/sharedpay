@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +54,7 @@ public class BillServiceIT {
     public void init() {
 
         MockitoAnnotations.openMocks(this);
+
         Person person1 = new Person("Alan", "Santos", "329.616.180-53");
         Person person2 = new Person("Brand", "Kay", "601.624.520-80");
         Person person3 = new Person("Gilbert", "Jey", "905.424.800-93");
@@ -75,7 +78,7 @@ public class BillServiceIT {
 
     @Test
     @Transactional
-    void registerBill_shouldReturnBillWithIdAndPayments() {
+    void registerBill_whenUserExistsAndHasSufficientCredit_shouldReturnBillWithIdAndPayments() {
         //Arrange
         ReflectionTestUtils.setField(billOwner, "credit", BigDecimal.valueOf(100));
         userRepository.save(billOwner);
@@ -92,43 +95,36 @@ public class BillServiceIT {
     }
 
     @Test
+    @Sql("classpath:test-data.sql")
     @Transactional
     void getBillPayments_whenBillIsInTheRepository_ShouldReturnBillPayments() {
-        //Arrange
-        List<Payment> billPayments = providePayments();
-        ReflectionTestUtils.setField(bill, "payments", billPayments);
-        Bill billSaved = billRepository.save(bill);
+        List<Payment> billPaymentsExpected = providePayments();
 
         //Act
-        List<Payment> paymentsReturned = billService.getBillPayments(billSaved.getId());
+        List<Payment> paymentsReturned = billService.getBillPayments(245L);
 
         //Assert
-        assertEquals(billPayments.size(), paymentsReturned.size());
-        for(int i = 0; i< billPayments.size(); i++) {
-            assertEquals(billPayments.get(i).getPaymentUrl(), paymentsReturned.get(i).getPaymentUrl());
-            assertEquals(billPayments.get(i).getStatus(), paymentsReturned.get(i).getStatus());
-            assertEquals(billPayments.get(i).getValue(), paymentsReturned.get(i).getValue());
-            assertEquals(billPayments.get(i).getDebtor().getCpf(), paymentsReturned.get(i).getDebtor().getCpf());
+        assertEquals(billPaymentsExpected.size(), paymentsReturned.size());
+        for(int i = 0; i< billPaymentsExpected.size(); i++) {
+            assertEquals(billPaymentsExpected.get(i).getPaymentUrl(), paymentsReturned.get(i).getPaymentUrl());
+            assertEquals(billPaymentsExpected.get(i).getStatus(), paymentsReturned.get(i).getStatus());
+            assertEquals(billPaymentsExpected.get(i).getValue(), paymentsReturned.get(i).getValue());
+            assertEquals(billPaymentsExpected.get(i).getDebtor().getCpf(), paymentsReturned.get(i).getDebtor().getCpf());
         }
     }
 
 
     @Test
+    @Sql("classpath:test-data.sql")
     @Transactional
     void requestPayments_whenPaymentServiceIsSuccessful_shouldReturnPendingPaymentsWithPaymentUrlFromPaymentService() {
-        //Arrange
-        List<Payment> billPayments = providePayments();
-        ReflectionTestUtils.setField(bill, "payments", billPayments);
-
         String paymentUrl1 = "https://app.picpay.com/checkout/NWZkOTK";
         String paymentUrl2 = "https://app.picpay.com/checkout/NWZkOTA";
         List<String> paymentsUrl = new ArrayList<>(Arrays.asList(paymentUrl1, paymentUrl2));
-        when(paymentService.requestPayments(billPayments)).thenReturn(paymentsUrl);
-
-        Bill billSaved = billRepository.save(bill);
+        when(paymentService.requestPayments(any(List.class))).thenReturn(paymentsUrl);
 
         //Act
-        List<Payment> paymentsReturned = billService.requestPayments(billSaved.getId());
+        List<Payment> paymentsReturned = billService.requestPayments(245L);
 
         //Assert
         assertEquals(paymentsUrl.size(), paymentsReturned.size());
@@ -139,10 +135,17 @@ public class BillServiceIT {
     }
 
     private List<Payment> providePayments(){
-        Person person1 = new Person("Alan", "Santos", "329.616.180-53");
+        String paymentUrl1 = "https://app.picpay.com/checkout/NWZkOTK";
+        String paymentUrl2 = "https://app.picpay.com/checkout/NWZkOTA";
+        Person person1 = new Person("Brand", "Kay", "601.624.520-80");
         Payment payment1 = new Payment(person1, new BigDecimal("20.22"), bill);
-        Person person2 = new Person("Brand", "Kay", "601.624.520-80");
+        payment1.setStatus(PaymentStatus.PENDING);
+        ReflectionTestUtils.setField(payment1, "paymentUrl", paymentUrl1);
+
+        Person person2 = new Person("Gilbert", "Jey", "905.424.800-93");
         Payment payment2 = new Payment(person2, new BigDecimal("35.22"), bill);
+        ReflectionTestUtils.setField(payment2, "paymentUrl", paymentUrl2);
+        payment2.setStatus(PaymentStatus.PENDING);
         List<Payment> billPayments = new ArrayList<>(Arrays.asList(payment1, payment2));
         return billPayments;
     }
