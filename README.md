@@ -17,6 +17,7 @@ Content Table
     * [Pgadmin](#pgadmin)
     * [Interactive Documentation](#executing)
 * [Business Flux](#business-flux)
+* [API Use Examples](#)
 * [API Architecture](#api-architecture)
   * [Components](#components)
   * [Exception Handling](#exception-handling)
@@ -98,6 +99,115 @@ The main idea of the app is for a user use his internal credits to pay shared bi
 
 5. The user shares the links with his friends and then they can pay him back. If the status of the payments changes, a notification is expected to be made by the picpay api to "Post /confirm-payment". When the notification is received, the application checks the status of the payment calling the picpay api and then, depending of the answer, sets the new payment status. The picpay api really can notify the api, but, as this api is not in a public site, this behavior doesn't happen. You can simulate partially calling the endpoint.
 
+---
+### API Use Examples
+   1. POST /users
+   * request body:
+      {
+        "firstName": "Murilo",
+        "lastName": "Farias",
+        "cpf": "00293966206"
+      }
+      
+   * response body: 
+      {
+        "id": 2,
+        "firstName": "Murilo",
+        "credit": 0,
+        "lastName": "Farias",
+        "cpf": "00293966206"
+      }
+      
+   2. PUT /users/2/add-credit
+   * request body:
+      {
+         "value": 200.00
+      }
+      
+   * response body: 
+      {
+        "id": 2,
+        "firstName": "Murilo",
+        "credit": 200,
+        "lastName": "Farias",
+        "cpf": "00293966206"
+      } 
+      
+    3. POST /bills
+    * request body:
+      {
+        "additionals": 8.00,
+        "discounts": 20.00,
+        "hasWaiterService": false,
+        "individualSpendings": [
+          {
+            "value": 42.00,
+            "person": {
+              "firstName": "Eduardo",
+              "lastName": "Monteiro",
+              "cpf": "01942539290"
+            }
+          },
+          {
+            "value": 8.00,
+            "person": {
+              "firstName": "Alan",
+              "lastName": "Pera",
+              "cpf": "00293966206"
+            }
+          }
+        ],
+        "owner": {
+          "firstName": "Alan",
+          "lastName": "Pera",
+          "cpf": "00293966206"
+        }
+      }
+      
+      
+   * response body: 
+      {
+         "id": 4
+        "additionals": 8.00,
+        "discounts": 20.00,
+        "hasWaiterService": false,
+        "individualSpendings": [
+          {
+            "value": 42.00,
+            "person": {
+              "firstName": "Eduardo",
+              "lastName": "Monteiro",
+              "cpf": "01942539290"
+            }
+          },
+          {
+            "value": 8.00,
+            "person": {
+              "firstName": "Alan",
+              "lastName": "Pera",
+              "cpf": "00293966206"
+            }
+          }
+        ],
+        "payments": [
+          {
+            "id": 7,
+            "status": "NON_REQUESTED",
+            "debtor": {
+              "firstName": "Eduardo",
+              "lastName": "Monteiro",
+              "cpf": "01942539290"
+            },
+            "value": 31.92
+          }
+        ],
+        "owner": {
+          "firstName": "Alan",
+          "lastName": "Pera",
+          "cpf": "00293966206"
+        }
+      }
+    
 ---
 ### API Architecture
 The api architecture is a simplification of a the plug and adapter architecture. There is only one primary adapter and it resides in the subpackage "controller". The other adapters are secondary adapter and they are located in the subpackage "adapter". 
