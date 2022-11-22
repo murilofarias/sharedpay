@@ -1,0 +1,1 @@
+DELETE FROM bill WHERE id = 245;
