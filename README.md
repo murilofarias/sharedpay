@@ -87,7 +87,7 @@ The main idea of the app is for a user use his internal credits to pay shared bi
 
 1. First the user, the one that will register the bill, needs to be registered in the system, so to do that the endpoint "POST /users" must be called with the user information.
 
-2. The user now needs to add some credit to his user account. This part is only simulated, you can add any value of credit you would like calling the enpoint "PUT /users/{id}/add-credit". If you are not sure about the id, you can check in "GET /users" that returns the list of all users.
+2. The user now needs to add some credit to his user account. This part is only simulated, you can add any value of credit you would like calling the endpoint "PUT /users/{id}/add-credit". If you are not sure about the id, you can check in "GET /users" that returns the list of all users.
 
 3. 
 * With sufficient credit, the user can register a reasonable bill by "POST /bills". 
@@ -97,7 +97,7 @@ The main idea of the app is for a user use his internal credits to pay shared bi
 
 4. The payments can be requested now by "PUT /bills/{id}/request-payments". It returns the links to the picpay payment system.
 
-5. The user shares the links with his friends and then they can pay him back. If the status of the payments changes, a notification is expected to be made by the picpay api to "Post /confirm-payment". When the notification is received, the application checks the status of the payment calling the picpay api and then, depending of the answer, sets the new payment status. The picpay api really can notify the api, but, as this api is not in a public site, this behavior doesn't happen. You can simulate partially calling the endpoint.
+5. The user shares the links with his friends and then they can pay him back. If the status of the payments changes, a notification is expected to be made by the picpay api to "Post /confirm-payment". When the notification is received, the application checks the status of the payment calling the picpay api and then, depending on the answer, sets the new payment status. The picpay api really can notify the api, but, as this api is not in a public site, this behavior doesn't happen. You can simulate partially calling the endpoint.
 
 ---
 ### API Use Examples
@@ -210,7 +210,7 @@ The main idea of the app is for a user use his internal credits to pay shared bi
     
 ---
 ### API Architecture
-The api architecture is a simplification of a the plug and adapter architecture. There is only one primary adapter and it resides in the subpackage "controller". The other adapters are secondary adapter and they are located in the subpackage "adapter". 
+The api architecture is a simplification of a plug and adapter architecture. There is only one primary adapter and it resides in the subpackage "controller". The other adapters are secondary adapters and they are located in the subpackage "adapter". 
 
 #### Components
 
