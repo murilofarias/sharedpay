@@ -55,8 +55,8 @@ $ git clone https://github.com/murilofarias/sharedpay.git
 # Change the working directory to the cloned project.
 $ cd sharedpay
 
-# Do the build of the application
-$ ./mvnw package
+# Do the build of the application skipping tests
+$ ./mvnw package -Dmaven.test.skip
 
 # Execute docker compose file
 $ docker compose up
