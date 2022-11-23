@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 public class PaymentDto {
 
 
-    private Long id;
+    private String id;
 
     private PaymentStatus status;
 
@@ -30,7 +30,7 @@ public class PaymentDto {
     private String paymentUrl;
 
     public PaymentDto(Payment payment){
-        this.id = payment.getId();
+        this.id = payment.getId().toString();
         this.status = payment.getStatus();
         this.debtor = new PersonDto(payment.getDebtor());
         this.fulfillmentDate = payment.getFulfillmentDate();

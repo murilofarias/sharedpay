@@ -1,14 +1,20 @@
 package br.com.murilofarias.sharedpay.core.model;
 
+import br.com.murilofarias.sharedpay.core.error.DomainException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static br.com.murilofarias.sharedpay.util.CpfUtils.eliminateDotsAndDashes;
 
 @Getter
 @NoArgsConstructor
@@ -35,17 +41,31 @@ public class Bill{
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL)
     private List<Payment> payments;
 
+    @Column
+    private Boolean includeOwnerPayment;
+
     @Embedded
     private Person owner;
 
     public Bill(BigDecimal additionals, BigDecimal discounts,
-                Boolean hasWaiterService, List<IndividualSpending> individualSpendings, Person owner){
+                Boolean hasWaiterService, List<IndividualSpending> individualSpendings,
+                Boolean includeOwnerPayment, String ownerCpf){
 
         this.additionals = additionals;
         this.discounts = discounts;
         this.hasWaiterService = hasWaiterService;
         this.individualSpendings = individualSpendings;
-        this.owner = owner;
+        this.includeOwnerPayment = includeOwnerPayment;
+
+
+
+        this.owner = individualSpendings
+                .stream()
+                .map(IndividualSpending::getPerson)
+                .filter(person -> person.getCpf().equals(eliminateDotsAndDashes(ownerCpf)))
+                .findAny()
+                .orElseThrow(() ->
+                        new DomainException("Error creating Bill", "Owner needs to be a person in IndividualSpendings!"));
 
         individualSpendings
                 .stream()
@@ -64,10 +84,14 @@ public class Bill{
 
         BigDecimal constantFactor = total.divide(individualSpendingsSum, 6, RoundingMode.HALF_UP);
 
-        this.payments = individualSpendings
-                .stream()
-                .filter(individualSpending -> !individualSpending.getPerson().getCpf().equals(owner.getCpf()))
-                .map(individualSpending -> {
+        Stream<IndividualSpending> individualSpendingsStream  = individualSpendings
+                .stream();
+
+        if(!includeOwnerPayment) {
+            individualSpendingsStream = individualSpendingsStream.filter(individualSpending -> !individualSpending.getPerson().getCpf().equals(owner.getCpf()));
+        }
+
+        this.payments =  individualSpendingsStream.map(individualSpending -> {
                     BigDecimal paymentValue = individualSpending.getValue()
                             .multiply(constantFactor)
                             .setScale(2, RoundingMode.HALF_UP);
@@ -75,6 +99,7 @@ public class Bill{
                     return new Payment(individualSpending.getPerson(), paymentValue, this);
                 })
                 .collect(Collectors.toList());
+
     }
 
     public BigDecimal getIndividualSpendingSum(){

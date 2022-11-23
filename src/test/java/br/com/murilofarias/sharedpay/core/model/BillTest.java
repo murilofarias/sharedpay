@@ -3,6 +3,7 @@ package br.com.murilofarias.sharedpay.core.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,11 +27,6 @@ class BillTest {
 
     private static Person billOwner;
 
-    @BeforeEach
-    public void init(){
-        billOwner = new Person("Alan", "Santos", "329.616.180-53");
-
-    }
 
     @ParameterizedTest
     @MethodSource("provideSpendings")
@@ -43,7 +39,8 @@ class BillTest {
                 spendingBundleTest.getDiscounts(),
                 true,
                 spendingBundleTest.getIndividualSpendings(),
-                billOwner);
+                false,
+                billOwner.getCpf());
 
         //Assert
         assertEquals(spendingBundleTest.getAdditionals(), bill.getAdditionals());
@@ -63,7 +60,8 @@ class BillTest {
                 spendingBundleTest.getDiscounts(),
                 true,
                 spendingBundleTest.getIndividualSpendings(),
-                billOwner);
+                false,
+                billOwner.getCpf());
 
 
         //Assert
@@ -74,8 +72,8 @@ class BillTest {
 
     @ParameterizedTest
     @MethodSource("provideBillSpendingsForGeneratePaymentsWithoutWaiterService")
-    @DisplayName("Testing generation of payments in a bill without waiter service")
-    void generatePayments_whenThereIsNoWaiterService(
+    @DisplayName("Testing generation of payments in a bill without waiter service and owner payment is not included")
+    void generatePayments_whenThereIsNoWaiterServiceAndOwnerPaymentIsNotIncluded(
             BigDecimal additionals,
             BigDecimal discounts,
             List<IndividualSpending> individualSpendings,
@@ -83,14 +81,15 @@ class BillTest {
 
         //Arrange
         boolean hasWaiterService = false;
-
+        boolean includeOwnerPayment = false;
 
         Bill bill =  new Bill(
                 additionals,
                 discounts,
                 hasWaiterService,
                 individualSpendings,
-                billOwner);
+                includeOwnerPayment,
+                billOwner.getCpf());
 
         //Act
         bill.generatePayments();
@@ -127,22 +126,23 @@ class BillTest {
 
     @ParameterizedTest
     @MethodSource("provideBillSpendingsForGeneratePaymentsWithWaiterService")
-    @DisplayName("Testing generation of payments in a bill with waiter service")
-    void generatePayments_whenThereIsWaiterService(
+    @DisplayName("Testing generation of payments in a bill with waiter service and owner payment is not included")
+    void generatePayments_whenThereIsWaiterServiceAndOwnerPaymentIsNotIncluded(
             BigDecimal additionals,
             BigDecimal discounts,
             List<IndividualSpending> individualSpendings,
             List<BigDecimal> expectedPayments) {
         //Arrange
         boolean hasWaiterService = true;
-
+        boolean includeOwnerPayment = false;
 
         Bill bill =  new Bill(
                 additionals,
                 discounts,
                 hasWaiterService,
                 individualSpendings,
-                billOwner);
+                includeOwnerPayment,
+                billOwner.getCpf());
 
         //Act
         bill.generatePayments();
@@ -181,6 +181,7 @@ class BillTest {
     private static  List<SpendingBundleTest> provideSpendings(){
         List<SpendingBundleTest> spendingBundleTests = new ArrayList<>();
 
+        billOwner = new Person("Alan", "Santos", "329.616.180-53");
         Person person2 = new Person("Brand", "Kay", "601.624.520-80");
         Person person3 = new Person("Gilbert", "Jey", "905.424.800-93");
 
