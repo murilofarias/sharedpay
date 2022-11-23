@@ -3,6 +3,7 @@ package br.com.murilofarias.sharedpay.core.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,11 +27,6 @@ class BillTest {
 
     private static Person billOwner;
 
-    @BeforeEach
-    public void init(){
-        billOwner = new Person("Alan", "Santos", "329.616.180-53");
-
-    }
 
     @ParameterizedTest
     @MethodSource("provideSpendings")
@@ -44,7 +40,7 @@ class BillTest {
                 true,
                 spendingBundleTest.getIndividualSpendings(),
                 false,
-                billOwner);
+                billOwner.getCpf());
 
         //Assert
         assertEquals(spendingBundleTest.getAdditionals(), bill.getAdditionals());
@@ -65,7 +61,7 @@ class BillTest {
                 true,
                 spendingBundleTest.getIndividualSpendings(),
                 false,
-                billOwner);
+                billOwner.getCpf());
 
 
         //Assert
@@ -93,7 +89,7 @@ class BillTest {
                 hasWaiterService,
                 individualSpendings,
                 includeOwnerPayment,
-                billOwner);
+                billOwner.getCpf());
 
         //Act
         bill.generatePayments();
@@ -146,7 +142,7 @@ class BillTest {
                 hasWaiterService,
                 individualSpendings,
                 includeOwnerPayment,
-                billOwner);
+                billOwner.getCpf());
 
         //Act
         bill.generatePayments();
@@ -185,6 +181,7 @@ class BillTest {
     private static  List<SpendingBundleTest> provideSpendings(){
         List<SpendingBundleTest> spendingBundleTests = new ArrayList<>();
 
+        billOwner = new Person("Alan", "Santos", "329.616.180-53");
         Person person2 = new Person("Brand", "Kay", "601.624.520-80");
         Person person3 = new Person("Gilbert", "Jey", "905.424.800-93");
 

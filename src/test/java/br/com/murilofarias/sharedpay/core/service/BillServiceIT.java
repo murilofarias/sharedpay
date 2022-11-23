@@ -77,7 +77,7 @@ public class BillServiceIT {
                 hasWaiterService,
                 individualSpendings,
                 includeOwnerPayment,
-                person1);
+                billOwner.getPerson().getCpf());
         billService =  new BillService(billRepository,paymentService,  paymentRepository, userRepository);
 
     }

@@ -1,8 +1,11 @@
 package br.com.murilofarias.sharedpay.core.model;
 
+import br.com.murilofarias.sharedpay.core.error.DomainException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -10,6 +13,8 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static br.com.murilofarias.sharedpay.util.CpfUtils.eliminateDotsAndDashes;
 
 @Getter
 @NoArgsConstructor
@@ -44,14 +49,23 @@ public class Bill{
 
     public Bill(BigDecimal additionals, BigDecimal discounts,
                 Boolean hasWaiterService, List<IndividualSpending> individualSpendings,
-                Boolean includeOwnerPayment, Person owner){
+                Boolean includeOwnerPayment, String ownerCpf){
 
         this.additionals = additionals;
         this.discounts = discounts;
         this.hasWaiterService = hasWaiterService;
         this.individualSpendings = individualSpendings;
         this.includeOwnerPayment = includeOwnerPayment;
-        this.owner = owner;
+
+
+
+        this.owner = individualSpendings
+                .stream()
+                .map(IndividualSpending::getPerson)
+                .filter(person -> person.getCpf().equals(eliminateDotsAndDashes(ownerCpf)))
+                .findAny()
+                .orElseThrow(() ->
+                        new DomainException("Error creating Bill", "Owner needs to be a person in IndividualSpendings!"));
 
         individualSpendings
                 .stream()

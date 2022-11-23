@@ -2,10 +2,15 @@ package br.com.murilofarias.sharedpay.controller.dto.request;
 
 import br.com.murilofarias.sharedpay.controller.dto.IndividualSpendingDto;
 import br.com.murilofarias.sharedpay.controller.dto.PersonDto;
+import br.com.murilofarias.sharedpay.core.error.ResourceNotFoundException;
 import br.com.murilofarias.sharedpay.core.model.Bill;
 import br.com.murilofarias.sharedpay.core.model.IndividualSpending;
+import br.com.murilofarias.sharedpay.core.model.Person;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.br.CPF;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -37,8 +42,9 @@ public class BillRequestDto {
     @Size(min=2)
     private List<@Valid IndividualSpendingDto> individualSpendings;
 
-    @NotNull
-    private PersonDto owner;
+    @CPF
+    @NotBlank
+    private String ownerCpf;
 
     public Bill toDomainModel(){
         List<IndividualSpending> individualSpendings = this.individualSpendings
@@ -46,13 +52,14 @@ public class BillRequestDto {
                 .map(IndividualSpendingDto::toDomainModel)
                 .collect(Collectors.toList());
 
+
         Bill bill =  new Bill(
                 additionals,
                 discounts,
                 hasWaiterService,
                 individualSpendings,
                 includeOwnerPayment,
-                owner.toDomainModel());
+                ownerCpf);
 
         return bill;
     }
