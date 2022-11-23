@@ -1,1 +1,4 @@
-DELETE FROM bill WHERE id = 245;
+DELETE FROM individual_spending;
+DELETE FROM payment;
+DELETE FROM bill;
+DELETE FROM user_account;
