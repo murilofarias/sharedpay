@@ -68,7 +68,6 @@ $ docker compose up
 $ ./mvnw test
 
 # Execute integration tests
-$ docker compose up
 $ ./mvnw verify
 ```
 ---
@@ -139,6 +138,7 @@ The main idea of the app is for a user use his internal credits to pay shared bi
         "additionals": 8.00,
         "discounts": 20.00,
         "hasWaiterService": false,
+        "includeOwnerPayment":false,
         "individualSpendings": [
           {
             "value": 42.00,
@@ -156,21 +156,16 @@ The main idea of the app is for a user use his internal credits to pay shared bi
               "cpf": "00293966206"
             }
           }
-        ],
-        "owner": {
-          "firstName": "Alan",
-          "lastName": "Pera",
-          "cpf": "00293966206"
-        }
+        ]
       }
-      
-      
+ ```     
    * response body: 
-      {
+     {
          "id": 4
         "additionals": 8.00,
         "discounts": 20.00,
         "hasWaiterService": false,
+        "includeOwnerPayment":false,
         "individualSpendings": [
           {
             "value": 42.00,
@@ -200,14 +195,9 @@ The main idea of the app is for a user use his internal credits to pay shared bi
             },
             "value": 31.92
           }
-        ],
-        "owner": {
-          "firstName": "Alan",
-          "lastName": "Pera",
-          "cpf": "00293966206"
-        }
-      }
-    
+        ]
+     }
+  ``` 
 ---
 ### API Architecture
 The api architecture is a simplification of a plug and adapter architecture. There is only one primary adapter and it resides in the subpackage "controller". The other adapters are secondary adapters and they are located in the subpackage "adapter". 
