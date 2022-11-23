@@ -14,7 +14,7 @@ import java.time.OffsetDateTime;
 public class PaymentResponseDto {
 
 
-    private Long id;
+    private String id;
 
 
     private PaymentStatus status;
@@ -28,7 +28,7 @@ public class PaymentResponseDto {
     private OffsetDateTime fulfillmentDate;
 
     public PaymentResponseDto(Payment payment){
-        this.id = payment.getId();
+        this.id = payment.getId().toString();
         this.status = payment.getStatus();
         this.debtor = payment.getDebtor();
         this.value = payment.getValue();

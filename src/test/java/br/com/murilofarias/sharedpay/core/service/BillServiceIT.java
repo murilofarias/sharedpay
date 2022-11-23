@@ -70,8 +70,14 @@ public class BillServiceIT {
         BigDecimal additionals = new BigDecimal("8.20");
         BigDecimal discounts = new BigDecimal("5.00");
         Boolean hasWaiterService = true;
-
-        bill = new Bill(additionals, discounts, hasWaiterService, individualSpendings, person1);
+        Boolean includeOwnerPayment = false;
+        bill = new Bill(
+                additionals,
+                discounts,
+                hasWaiterService,
+                individualSpendings,
+                includeOwnerPayment,
+                billOwner.getPerson().getCpf());
         billService =  new BillService(billRepository,paymentService,  paymentRepository, userRepository);
 
     }

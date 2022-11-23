@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 import static java.lang.Long.parseLong;
 
@@ -42,7 +43,7 @@ public class BillNotificationService {
             public void run() {
                 try {
                     PaymentStatus status = paymentService.requestPaymentStatus(paymentId);
-                    Payment payment = paymentRepository.findById(parseLong(paymentId)).get();
+                    Payment payment = paymentRepository.findById(UUID.fromString(paymentId)).get();
                     payment.setStatus(status);
                     paymentRepository.save(payment);
                     if(status.equals(PaymentStatus.FULFILLED))
